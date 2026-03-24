@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agent Chat Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 { color: #333; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .log {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Agent Chat Widget Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: Verify Application is Running</h2>
+        <button onclick="checkBackend()">Check Backend Status</button>
+        <div id="backend-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: Test Quote Submission</h2>
+        <p>This will submit a test quote to the backend:</p>
+        <button onclick="testQuote()">Submit Test Quote</button>
+        <div id="quote-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 3: Test Application Submission</h2>
+        <p>First submit a quote, then click here to test application:</p>
+        <button onclick="testApplication()">Submit Test Application</button>
+        <div id="app-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 4: Check Widget State</h2>
+        <button onclick="checkWidget()">Check Widget</button>
+        <button onclick="checkTabs()">Check Tabs</button>
+        <button onclick="forceSwitchToUW()">Force Switch to UW Tab</button>
+        <div id="widget-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Logs</h2>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <div class="log" id="test-logs"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let testQuoteId = null;
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('test-logs');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+            if (type === 'error') entry.style.color = 'red';
+            if (type === 'success') entry.style.color = 'green';
+            logs.insertBefore(entry, logs.firstChild);
+        }
+
+        function clearLogs() {
+            document.getElementById('test-logs').innerHTML = '';
+            log('Logs cleared');
+        }
+
+        async function checkBackend() {
+            const status = document.getElementById('backend-status');
+            try {
+                log('Checking backend health...');
+                const response = await fetch('http://localhost:8080/actuator/health');
+                if (response.ok) {
+                    status.innerHTML = '<p class="success">✅ Backend is running!</p>';
+                    log('Backend is healthy', 'success');
+                } else {
+                    status.innerHTML = '<p class="error">❌ Backend returned error</p>';
+                    log('Backend returned error: ' + response.status, 'error');
+                }
+            } catch (error) {
+                status.innerHTML = '<p class="error">❌ Backend is not running. Start with: mvn spring-boot:run</p>';
+                log('Backend connection failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testQuote() {
+            const status = document.getElementById('quote-status');
+            try {
+                log('Submitting test quote...');
+                const response = await fetch(`${API_BASE}/quotes/calculate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        age: 30,
+                        coverageAmount: 500000,
+                        healthStatus: 'Excellent'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Quote request failed');
+                
+                const data = await response.json();
+                testQuoteId = data.quoteId;
+                
+                status.innerHTML = `
+                    <p class="success">✅ Quote submitted successfully!</p>
+                    <p>Quote ID: ${data.quoteId}</p>
+                    <p>Monthly Premium: $${data.monthlyPremium}</p>
+                    <p>Agent Trace Lines: ${data.agentTrace ? data.agentTrace.length : 0}</p>
+                `;
+                log(`Quote created: ${data.quoteId}, Premium: $${data.monthlyPremium}`, 'success');
+                
+                if (data.agentTrace && data.agentTrace.length > 0) {
+                    log(`Agent trace has ${data.agentTrace.length} lines`, 'success');
+                } else {
+                    log('WARNING: No agent trace in response', 'error');
+                }
+            } catch (error) {
+                status.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+                log('Quote submission failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testApplication() {
+            const status = document.getElementById('app-status');
+            
+            if (!testQuoteId) {
+                status.innerHTML = '<p class="error">❌ Please submit a quote first!</p>';
+                log('No quote ID available', 'error');
+                return;
+            }
+
+            try {
+                log('Submitting test application...');
+                const response = await fetch(`${API_BASE}/applications/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        quoteId: testQuoteId,
+                        applicantName: 'Test User',
+                        applicantEmail: 'test@example.com',
+                        applicantPhone: '555-0123',
+                        applicantAddress: '123 Test St'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Application request failed');
+                
+                const data = await response.json();
+                
+                status.innerHTML = `
+                    <p class="success">✅ Application submitted successfully!</p>
+                    <p>Application Number: ${data.applicationNumber}</p>
+                    <p>Decision: ${data.underwritingResult?.decision}</p>
+                    <p>UW Agent Trace Lines: ${data.underwritingResult?.agentTrace?.length || 0}</p>
+                `;
+                
+                log(`Application created: ${data.applicationNumber}`, 'success');
+                log(`UW Decision: ${data.underwritingResult?.decision}`, 'success');
+                
+                if (data.underwritingResult?.agentTrace) {
+                    log(`UW Agent trace has ${data.underwritingResult.agentTrace.length} lines`, 'success');
+                } else {
+                    log('WARNING: No UW agent trace in response', 'error');
+                }
+                
+                // Check if widget updated
+                setTimeout(checkWidget, 1000);
+            } catch (error) {
+                status.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+                log('Application submission failed: ' + error.message, 'error');
+            }
+        }
+
+        function checkWidget() {
+            const status = document.getElementById('widget-status');
+            const widget = document.getElementById('floating-agent-chat');
+            
+            if (!widget) {
+                status.innerHTML = '<p class="error">❌ Widget not found in DOM</p>';
+                log('Widget element not found', 'error');
+                return;
+            }
+            
+            log('Widget found in DOM', 'success');
+            
+            const isCollapsed = widget.classList.contains('collapsed');
+            const tabs = widget.querySelectorAll('.agent-tab');
+            const quoteTab = widget.querySelector('[data-agent="quote"]');
+            const uwTab = widget.querySelector('[data-agent="underwriting"]');
+            const quoteChat = document.getElementById('quote-agent-chat');
+            const uwChat = document.getElementById('underwriting-agent-chat');
+            
+            let html = '<h3>Widget Status:</h3>';
+            html += `<p>State: ${isCollapsed ? '🔽 Collapsed' : '🔼 Expanded'}</p>`;
+            html += `<p>Total Tabs: ${tabs.length}</p>`;
+            
+            if (quoteTab) {
+                html += `<p>Quote Tab: ${quoteTab.style.display !== 'none' ? '✅ Visible' : '❌ Hidden'} | ${quoteTab.classList.contains('active') ? '🟢 Active' : '⚪ Inactive'}</p>`;
+                log(`Quote tab - Display: ${quoteTab.style.display}, Active: ${quoteTab.classList.contains('active')}`);
+            }
+            
+            if (uwTab) {
+                html += `<p>UW Tab: ${uwTab.style.display !== 'none' ? '✅ Visible' : '❌ Hidden'} | ${uwTab.classList.contains('active') ? '🟢 Active' : '⚪ Inactive'}</p>`;
+                log(`UW tab - Display: ${uwTab.style.display}, Active: ${uwTab.classList.contains('active')}`);
+            }
+            
+            if (quoteChat) {
+                html += `<p>Quote Chat: Display = ${quoteChat.style.display || 'default'}</p>`;
+                log(`Quote chat display: ${quoteChat.style.display}`);
+            }
+            
+            if (uwChat) {
+                html += `<p>UW Chat: Display = ${uwChat.style.display || 'default'}</p>`;
+                const hasContent = uwChat.innerHTML.trim().length > 0;
+                html += `<p>UW Chat Content: ${hasContent ? '✅ Has content' : '❌ Empty'}</p>`;
+                log(`UW chat display: ${uwChat.style.display}, Has content: ${hasContent}`);
+            }
+            
+            status.innerHTML = html;
+        }
+
+        function checkTabs() {
+            const tabs = document.querySelectorAll('.agent-tab');
+            log(`Found ${tabs.length} tabs:`);
+            tabs.forEach((tab, i) => {
+                log(`  Tab ${i + 1}: agent="${tab.dataset.agent}", active="${tab.classList.contains('active')}", display="${tab.style.display}"`);
+            });
+        }
+
+        function forceSwitchToUW() {
+            log('Attempting to force switch to UW tab...');
+            try {
+                if (typeof switchAgentTab === 'function') {
+                    switchAgentTab('underwriting');
+                    log('Called switchAgentTab function', 'success');
+                } else {
+                    log('switchAgentTab function not found, using manual method', 'error');
+                    
+                    // Manual switch
+                    const tabs = document.querySelectorAll('.agent-tab');
+                    tabs.forEach(tab => {
+                        if (tab.dataset.agent === 'underwriting') {
+                            tab.classList.add('active');
+                        } else {
+                            tab.classList.remove('active');
+                        }
+                    });
+                    
+                    const quoteChat = document.getElementById('quote-agent-chat');
+                    const uwChat = document.getElementById('underwriting-agent-chat');
+                    if (quoteChat) quoteChat.style.display = 'none';
+                    if (uwChat) uwChat.style.display = 'block';
+                    
+                    log('Manual switch completed', 'success');
+                }
+                setTimeout(checkWidget, 100);
+            } catch (error) {
+                log('Switch failed: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-check backend on load
+        window.onload = function() {
+            log('Test page loaded');
+            checkBackend();
+        };
+    </script>
+</body>
+</html>

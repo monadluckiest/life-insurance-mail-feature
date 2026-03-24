@@ -1,0 +1,225 @@
+@startuml Smart Policy Platform - Agent Architecture Flow
+
+title Smart Policy Platform - Multi-Agent Architecture\n(Happy Path vs Complex Path with Manual Review)
+
+actor "Applicant" as User
+participant "Frontend\n(JavaScript)" as UI
+participant "ApplicationController\n(Java)" as AppController
+participant "QuoteAgentService\n(Java)" as QuoteService
+participant "Quote Agent\n(Python/LangChain)" as QuoteAgent
+participant "UnderwritingAgentService\n(Java)" as UWService
+participant "Instant UW Agent\n(Python/LangChain)" as UWAgent
+participant "EvidenceAgentService\n(Java)" as EvidenceService
+participant "Evidence Agent\n(Python/LangChain)" as EvidenceAgent
+participant "ManualUWAgentService\n(Java)" as ManualService
+participant "Manual UW Agent\n(Python/LangChain)" as ManualAgent
+participant "Human Underwriter\n(Admin Dashboard)" as Human
+participant "StripePaymentService\n(Java)" as Payment
+participant "PolicyIssuanceAgentService\n(Java)" as PolicyService
+participant "Policy Issuance Agent\n(Python/LangChain)" as PolicyAgent
+database "H2 Database" as DB
+
+== STEP 1: Quote Generation (Both Paths) ==
+
+User -> UI: Enter details\n(Age, Coverage, Health)
+UI -> AppController: POST /api/quotes
+AppController -> QuoteService: generateQuote(request)
+QuoteService -> QuoteAgent: POST /agent/quote
+note right of QuoteAgent
+**Quote Agent Tools:**
+- calculate_premium
+- assess_risk_factors
+- determine_eligibility
+end note
+QuoteAgent -> QuoteAgent: Calculate premium\nusing actuarial rules
+QuoteAgent --> QuoteService: Quote + monthly premium
+QuoteService -> DB: Save InsuranceQuote
+QuoteService --> AppController: QuoteResponse
+AppController --> UI: Quote details
+UI --> User: Display quote
+
+== STEP 2A: Happy Path - Instant Approval ==
+
+note over User, DB #lightgreen
+**HAPPY PATH CONDITIONS:**
+- Age < 50
+- Coverage < $500,000
+- No serious medical conditions
+end note
+
+User -> UI: Submit Application
+UI -> AppController: POST /api/applications
+AppController -> UWService: performInstantUnderwriting()
+UWService -> UWAgent: POST /agent/underwrite
+note right of UWAgent
+**Enhanced UW Agent:**
+Rules Engine checks:
+1. Coverage > $500k? ❌
+2. Age > 50? ❌
+3. Medical conditions? ❌
+**Decision: INSTANT_APPROVE**
+end note
+UWAgent -> UWAgent: Run rules engine\nAll checks pass
+UWAgent --> UWService: decision=APPROVE
+UWService -> DB: Update status=APPROVED
+UWService --> AppController: Approved response
+AppController --> UI: Application approved
+UI --> User: Show approval card
+
+User -> UI: Make payment
+UI -> AppController: POST /api/applications/{id}/payment
+AppController -> Payment: createPaymentIntent()
+Payment -> Payment: Stripe API call
+Payment --> AppController: Payment Intent ID
+AppController -> DB: Save payment intent
+AppController --> UI: Client secret
+UI -> User: Stripe Checkout
+User -> Payment: Complete payment
+Payment -> AppController: Webhook: payment_intent.succeeded
+AppController -> PolicyService: issuePolicy()
+PolicyService -> PolicyAgent: POST /agent/issue-policy
+PolicyAgent -> PolicyAgent: Generate policy document
+PolicyAgent --> PolicyService: Policy PDF + number
+PolicyService -> DB: Save InsurancePolicy
+PolicyService --> AppController: Policy issued
+AppController --> UI: Policy details
+UI --> User: Download policy
+
+== STEP 2B: Complex Path - Manual Review Required ==
+
+note over User, DB #lightyellow
+**COMPLEX PATH TRIGGERS:**
+- Age ≥ 50 OR
+- Coverage ≥ $500,000 OR
+- Medical conditions present
+(e.g., Hypertension, Diabetes)
+end note
+
+User -> UI: Submit Application\n(Age: 55, Coverage: $750k,\nHealth: Hypertension)
+UI -> AppController: POST /api/applications
+AppController -> UWService: performInstantUnderwriting()
+UWService -> UWAgent: POST /agent/underwrite
+
+note right of UWAgent
+**Enhanced UW Agent:**
+Rules Engine detects:
+✓ Age > 50 (55)
+✓ Coverage > $500k ($750k)
+✓ Medical condition (Hypertension)
+**Decision: MANUAL_REVIEW**
+end note
+
+UWAgent -> UWAgent: Run rules engine\n3 flags triggered
+UWAgent --> UWService: decision=MANUAL_REVIEW\nreasons=[age, coverage, health]
+UWService -> DB: Update status=MANUAL_REVIEW_PENDING
+
+== STEP 3: Evidence Collection (5-Second Simulation) ==
+
+UWService -> EvidenceService: requestEvidence()
+EvidenceService -> EvidenceAgent: POST /agent/request-evidence
+note right of EvidenceAgent
+**Evidence Agent Tools:**
+- aps_request_tool (2 sec)
+- medical_records_tool (1.5 sec)
+- evidence_analysis_tool
+Total: ~5 seconds simulation
+end note
+EvidenceAgent -> EvidenceAgent: Request APS documents\n(2-second delay)
+EvidenceAgent -> EvidenceAgent: Request medical records\n(1.5-second delay)
+EvidenceAgent -> EvidenceAgent: Generate mock evidence:\n- Physician notes\n- BP readings\n- Medication list
+EvidenceAgent --> EvidenceService: Evidence data (5000 chars)
+EvidenceService -> DB: Update evidenceData,\nstatus=EVIDENCE_COLLECTION
+EvidenceService --> UWService: Evidence collected
+
+== STEP 4: AI-Powered Manual Underwriting Analysis ==
+
+UWService -> ManualService: analyzeEvidence()
+ManualService -> ManualAgent: POST /agent/manual-underwrite\n(with evidence data)
+note right of ManualAgent
+**Manual UW Agent Tools:**
+- evidence_analysis_tool
+- risk_assessment_tool
+AI extracts key findings
+end note
+ManualAgent -> ManualAgent: Extract findings:\n- "Controlled" condition\n- Medication compliance\n- Non-smoker
+ManualAgent -> ManualAgent: Calculate risk rating:\nSTANDARD/MODERATE/HIGH
+ManualAgent -> ManualAgent: Generate recommendation:\nAPPROVE_STANDARD\nAPPROVE_WITH_CONDITIONS\nREJECT
+ManualAgent --> ManualService: Recommendation:\nAPPROVE_STANDARD\nRisk: MODERATE\nJustification (1000+ chars)
+ManualService -> DB: Update:\n- agentRecommendation\n- riskRating=MODERATE\n- status=AWAITING_HUMAN_DECISION
+ManualService --> UWService: Analysis complete
+UWService --> AppController: All agent traces:\n1. Quote Agent\n2. Underwriting Agent\n3. Evidence Agent\n4. Manual UW Agent
+AppController --> UI: Manual review response
+UI --> User: Show Manual Review Pending Card:\n"Your application requires\nhuman underwriter review"
+
+== STEP 5: Human Underwriter Decision (Future Implementation) ==
+
+note over Human, DB #lightblue
+**Admin Dashboard (To Be Built)**
+Future endpoints:
+- GET /admin/pending-reviews
+- POST /admin/approve/{id}
+- POST /admin/reject/{id}
+end note
+
+Human -> AppController: Login to admin dashboard
+Human -> AppController: GET /admin/pending-reviews
+AppController -> DB: Find applications\nwith status=AWAITING_HUMAN_DECISION
+DB --> AppController: List of pending applications
+AppController --> Human: Display:\n- Applicant details\n- Evidence summary\n- AI recommendation\n- Risk rating
+
+alt Human Approves
+    Human -> AppController: POST /admin/approve/{id}
+    AppController -> DB: Update status=APPROVED\napprovedAt=now()
+    AppController --> Human: Approval confirmed
+    note right of Human
+    Application proceeds to
+    Payment → Policy Issuance
+    (Same as Happy Path)
+    end note
+else Human Rejects
+    Human -> AppController: POST /admin/reject/{id}\n(with reason)
+    AppController -> DB: Update status=REJECTED\nunderwriterComments="reason"
+    AppController --> Human: Rejection confirmed
+    Human --> User: Send rejection notification
+end
+
+== Decision Points Summary ==
+
+note over QuoteAgent, ManualAgent #lavender
+**Agent Invocation Logic:**
+
+1. **Quote Agent** (Python)
+   - ALWAYS invoked for every request
+   - Calculates premiums using actuarial tables
+
+2. **Instant Underwriting Agent** (Python)
+   - ALWAYS invoked for every application
+   - Rules Engine decides path:
+     * APPROVE → Happy Path (payment → policy)
+     * REJECT → Application denied
+     * MANUAL_REVIEW → Triggers Steps 3-5
+
+3. **Evidence Agent** (Python)
+   - CONDITIONAL: Only if UW decision = MANUAL_REVIEW
+   - Simulates 5-second APS/medical records collection
+   - Returns mock evidence data
+
+4. **Manual Underwriting Agent** (Python)
+   - CONDITIONAL: Only after Evidence Agent completes
+   - AI-powered analysis of evidence
+   - Provides recommendation for human
+
+5. **Policy Issuance Agent** (Python)
+   - CONDITIONAL: Only after payment completion
+   - Generates policy PDF with terms
+end note
+
+legend right
+|= Symbol |= Meaning |
+| ❌ | Condition not met |
+| ✓ | Condition triggered |
+| → | Synchronous call |
+| --> | Response |
+endlegend
+
+@enduml

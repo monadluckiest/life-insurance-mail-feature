@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Insurance - Get Your Quote</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Set Python agent base URL for production environments  -->
+    <meta name="python-agent-base-url" content="http://integrated-platform.us-east-2.elasticbeanstalk.com/api" />
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🛡️ SecureLife Insurance</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Protect Your Loved Ones</h1>
+                <p class="hero-subtitle">Get instant life insurance coverage with our AI-powered platform. No waiting,
+                    no hassle.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container main-content">
+
+        <!-- Step 0: Needs Analysis -->
+        <div id="needs-analysis-section" class="card">
+            <div class="card-header">
+                <h2>Needs Analysis Agent</h2>
+                <p>Let AI determine your ideal coverage based on your profile</p>
+            </div>
+            <div class="card-body">
+                <form id="needs-analysis-form">
+                    <div class="form-group">
+                        <label for="needs-age">Your Age</label>
+                        <input type="number" id="needs-age" name="age" min="18" max="80" required
+                            placeholder="Enter your age">
+                    </div>
+                    <div class="form-group">
+                        <label for="dependents">Number of Dependents</label>
+                        <input type="number" id="dependents" name="dependents" min="0" required value="0"
+                            placeholder="Number of children/dependents">
+                    </div>
+                    <div class="form-group">
+                        <label for="needs-smoker">Do you smoke?</label>
+                        <select id="needs-smoker" name="isSmoker" required>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Analyze My Needs
+                    </button>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="#" id="skip-needs-analysis" style="color: #666; text-decoration: underline;">Skip to
+                            Quote</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Needs Analysis Agent Processing -->
+        <div id="needs-agent-processing" class="agent-card" style="display: none;">
+            <div class="agent-header">
+                <div class="agent-icon">🤖</div>
+                <h3>Needs Analysis Agent Processing</h3>
+            </div>
+            <div class="agent-body">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p class="agent-status">Analyzing your profile and calculating protection gap...</p>
+            </div>
+        </div>
+
+        <!-- Step 1: Quote Form -->
+        <div id="quote-section" class="card" style="display: none;">
+            <div class="card-header">
+                <h2>Get Your Instant Quote</h2>
+                <p>Answer a few simple questions to see your premium</p>
+            </div>
+            <div class="card-body">
+                <div id="needs-recommendation"
+                    style="display: none; background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="color: #166534; font-size: 1.1rem; margin-bottom: 0.5rem;">💡 Recommendation</h3>
+                    <p id="recommendation-text" style="color: #15803d;"></p>
+                </div>
+                <form id="quote-form">
+                    <div class="form-group">
+                        <label for="age">Your Age</label>
+                        <input type="number" id="age" name="age" min="18" max="80" required
+                            placeholder="Enter your age">
+                        <small>Must be between 18 and 80 years</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coverageAmount">Coverage Amount</label>
+                        <select id="coverageAmount" name="coverageAmount" required>
+                            <option value="">Select coverage amount</option>
+                            <option value="100000">$100,000</option>
+                            <option value="250000">$250,000</option>
+                            <option value="400000">$400,000</option>
+                            <option value="500000">$500,000</option>
+                            <option value="750000">$750,000</option>
+                            <option value="1000000">$1,000,000</option>
+                            <option value="1500000">$1,500,000</option>
+                            <option value="2000000">$2,000,000</option>
+                            <option value="custom">Custom Amount</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom-coverage-group" style="display: none;">
+                        <label for="customCoverageAmount">Enter Custom Coverage Amount ($)</label>
+                        <input type="number" id="customCoverageAmount" name="customCoverageAmount" min="50000"
+                            max="5000000" step="10000" placeholder="Enter amount (e.g., 350000)">
+                        <small>Enter amount between $50,000 and $5,000,000</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="healthStatus">Health Status</label>
+                        <select id="healthStatus" name="healthStatus" required>
+                            <option value="">Select your health status</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="isSmoker">Do you smoke?</label>
+                        <select id="isSmoker" name="isSmoker" required>
+                            <option value="">Select option</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Get My Quote
+                    </button>
+                    <button type="button" id="back-to-needs" class="btn btn-secondary btn-large"
+                        style="margin-top: 10px;">
+                        Back
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!-- ... existing code ... -->
+        <!-- Step 5: Policy Active -->
+        <div id="policy-active" class="card" style="display: none;">
+            <div class="card-header success">
+                <div class="success-icon">🎉</div>
+                <h2>Your Policy is Now ACTIVE!</h2>
+                <p>Congratulations! You're now protected.</p>
+            </div>
+            <div class="card-body">
+                <div class="policy-details">
+                    <h3>Policy Details</h3>
+                    <div class="policy-info">
+                        <div class="info-item">
+                            <span class="label">Policy Number:</span>
+                            <strong id="policy-number"></strong>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Status:</span>
+                            <span class="badge badge-success">ACTIVE</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Coverage:</span>
+                            <strong id="policy-coverage"></strong>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Monthly Premium:</span>
+                            <strong id="policy-premium"></strong>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Issue Date:</span>
+                            <strong id="policy-date"></strong>
+                        </div>
+                    </div>
+                </div>
+                <button id="download-policy" class="btn btn-primary btn-large">
+                    📄 Download Policy PDF
+                </button>
+                <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                    <h3>Policy Servicing</h3>
+                    <button id="update-address-btn" class="btn btn-secondary btn-large">
+                        🏠 Update Address
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policy Servicing Section -->
+        <div id="servicing-section" class="card" style="display: none;">
+            <div class="card-header">
+                <h2>Policy Servicing Agent</h2>
+                <p>Update your policy details instantly</p>
+            </div>
+            <div class="card-body">
+                <form id="address-change-form">
+                    <div class="form-group">
+                        <label for="new-address">New Address</label>
+                        <textarea id="new-address" required rows="3" placeholder="Enter your new address"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Update Address
+                    </button>
+                    <button type="button" id="cancel-servicing" class="btn btn-secondary btn-large"
+                        style="margin-top: 10px;">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Servicing Result -->
+        <div id="servicing-result" class="card" style="display: none;">
+            <div class="card-header success">
+                <div class="success-icon">✅</div>
+                <h2>Address Updated</h2>
+                <p>Formal confirmation generated by Policy Servicing Agent</p>
+            </div>
+            <div class="card-body">
+                <div style="background: #f8fafc; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-family: monospace; white-space: pre-wrap;"
+                    id="confirmation-letter-text"></div>
+                <button onclick="location.reload()" class="btn btn-primary btn-large" style="margin-top: 1.5rem;">
+                    Back to Home
+                </button>
+            </div>
+        </div>
+
+        <!-- Agent Processing Indicator -->
+        <div id="agent-processing" class="agent-card" style="display: none;">
+            <div class="agent-header">
+                <div class="agent-icon">🤖</div>
+                <h3>Quote Agent Processing</h3>
+            </div>
+            <div class="agent-body">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p class="agent-status">Analyzing your information and calculating premium...</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Quote Results -->
+        <div id="quote-results" class="card" style="display: none;">
+            <div class="card-header success">
+                <h2>Your Personalized Quote</h2>
+                <p>Based on your information, here's your premium</p>
+            </div>
+            <div class="card-body">
+                <div class="quote-display">
+                    <div class="quote-main">
+                        <div class="quote-amount">
+                            <span class="currency">$</span>
+                            <span id="monthly-premium" class="amount">25</span>
+                            <span class="period">/month</span>
+                        </div>
+                        <p class="quote-detail">for <span id="coverage-display">$500,000</span> coverage</p>
+                    </div>
+                    <div class="quote-details">
+                        <div class="detail-item">
+                            <span class="label">Annual Premium:</span>
+                            <span id="annual-premium" class="value">$300</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Age:</span>
+                            <span id="age-display" class="value">30</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Health:</span>
+                            <span id="health-display" class="value">Excellent</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="apply-now-btn" class="btn btn-primary btn-large">
+                    Apply Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Application Form -->
+        <div id="application-section" class="card" style="display: none;">
+            <div class="card-header">
+                <h2>Complete Your Application</h2>
+                <p>Just a few more details to get you covered</p>
+            </div>
+            <div class="card-body">
+                <form id="application-form">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required placeholder="John Doe">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+1234567890">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" required rows="3"
+                            placeholder="Enter your full address"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medications">Current Medications (Partial/Full List)</label>
+                        <textarea id="medications" name="medications" rows="2"
+                            placeholder="e.g. Metformin, Lisinopril, Albuterol (Leave empty if none)"></textarea>
+                        <small>Providing this helps our AI assess your application faster.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Submit Application
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Underwriting Agent Processing -->
+        <div id="underwriting-processing" class="agent-card" style="display: none;">
+            <div class="agent-header">
+                <div class="agent-icon">🤖</div>
+                <h3>Instant Underwriting Agent</h3>
+            </div>
+            <div class="agent-body">
+                <div class="uw-steps" id="uw-steps-container">
+                    <!-- Steps will be dynamically added based on scenario -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Rejected -->
+        <div id="rejection-section" class="card" style="display: none;">
+            <div class="card-header danger">
+                <div class="danger-icon">❌</div>
+                <h2>Application Not Approved</h2>
+                <p>We're unable to approve your application at this time</p>
+            </div>
+            <div class="card-body">
+                <div class="rejection-details">
+                    <h3>Reason for Rejection</h3>
+                    <div class="rejection-info">
+                        <p id="rejection-reason" class="rejection-message"></p>
+                        <div class="rejection-breakdown">
+                            <div class="check-item" id="credit-check-result">
+                                <span class="check-icon">⏳</span>
+                                <span class="check-text">Credit Check</span>
+                            </div>
+                            <div class="check-item" id="mib-check-result">
+                                <span class="check-icon">⏳</span>
+                                <span class="check-text">MIB Verification</span>
+                            </div>
+                            <div class="check-item" id="rules-check-result">
+                                <span class="check-icon">⏳</span>
+                                <span class="check-text">Rules Engine</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="btn btn-primary btn-large">
+                    Start New Application
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Payment Section -->
+        <div id="payment-section" class="card" style="display: none;">
+            <div class="card-header success">
+                <h2>✅ Application Approved!</h2>
+                <p>Complete payment via Stripe to activate your policy</p>
+                <div class="stripe-badge">
+                    <span>💳</span> Secured by Stripe
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="payment-summary">
+                    <h3>Payment Summary</h3>
+                    <div class="summary-item">
+                        <span>Application Number:</span>
+                        <strong id="app-number"></strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>First Premium Payment:</span>
+                        <strong id="payment-amount"></strong>
+                    </div>
+                </div>
+
+                <!-- Stripe Payment Element -->
+                <div id="payment-element"></div>
+
+                <button id="submit-payment" class="btn btn-primary btn-large">
+                    Complete Payment
+                </button>
+                <div id="payment-message" class="message"></div>
+            </div>
+        </div>
+
+        <!-- Policy Issuance Agent Processing -->
+        <div id="policy-processing" class="agent-card" style="display: none;">
+            <div class="agent-header">
+                <div class="agent-icon">🤖</div>
+                <h3>Policy Issuance Agent</h3>
+            </div>
+            <div class="agent-body">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p class="agent-status">Generating your policy document...</p>
+            </div>
+        </div>
+
+        <!-- Step 5: Policy Active -->
+        <div id="policy-active" class="card" style="display: none;">
+            <div class="card-header success">
+                <div class="success-icon">🎉</div>
+                <h2>Your Policy is Now ACTIVE!</h2>
+                <p>Congratulations! You're now protected.</p>
+            </div>
+            <div class="card-body">
+                <div class="policy-details">
+                    <h3>Policy Details</h3>
+                    <div class="policy-info">
+                        <div class="info-item">
+                            <span class="label">Policy Number:</span>
+                            <strong id="policy-number"></strong>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Status:</span>
+                            <span class="badge badge-success">ACTIVE</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Coverage:</span>
+                            <strong id="policy-coverage"></strong>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Monthly Premium:</span>
+                            <strong id="policy-premium"></strong>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Issue Date:</span>
+                            <strong id="policy-date"></strong>
+                        </div>
+                    </div>
+                </div>
+                <button id="download-policy" class="btn btn-primary btn-large">
+                    📄 Download Policy PDF
+                </button>
+                <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                    <h3>Policy Servicing</h3>
+                    <button id="update-address-btn" class="btn btn-secondary btn-large">
+                        🏠 Update Address
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policy Servicing Section -->
+        <div id="servicing-section" class="card" style="display: none;">
+            <div class="card-header">
+                <h2>Policy Servicing Agent</h2>
+                <p>Update your policy details instantly</p>
+            </div>
+            <div class="card-body">
+                <form id="address-change-form">
+                    <div class="form-group">
+                        <label for="new-address">New Address</label>
+                        <textarea id="new-address" required rows="3" placeholder="Enter your new address"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Update Address
+                    </button>
+                    <button type="button" id="cancel-servicing" class="btn btn-secondary btn-large"
+                        style="margin-top: 10px;">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Servicing Result -->
+        <div id="servicing-result" class="card" style="display: none;">
+            <div class="card-header success">
+                <div class="success-icon">✅</div>
+                <h2>Address Updated</h2>
+                <p>Formal confirmation generated by Policy Servicing Agent</p>
+            </div>
+            <div class="card-body">
+                <div style="background: #f8fafc; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-family: monospace; white-space: pre-wrap;"
+                    id="confirmation-letter-text"></div>
+                <button onclick="location.reload()" class="btn btn-primary btn-large" style="margin-top: 1.5rem;">
+                    Back to Home
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SecureLife Insurance. All rights reserved.</p>
+            <p>Powered by AI Agents for instant issuance</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js?v=rx_fix_5"></script>
+</body>
+
+</html>

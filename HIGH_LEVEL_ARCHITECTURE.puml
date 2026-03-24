@@ -1,0 +1,146 @@
+@startuml High-Level System Architecture
+
+!define PRIMARY_COLOR #4A90E2
+!define AGENT_COLOR #50C878
+!define EXTERNAL_COLOR #9B59B6
+!define DATA_COLOR #E67E22
+
+skinparam defaultFontSize 12
+skinparam defaultFontName Arial
+
+skinparam rectangle {
+    BackgroundColor PRIMARY_COLOR
+    BorderColor #2C5282
+    FontColor white
+    RoundCorner 10
+    FontSize 13
+}
+
+skinparam cloud {
+    BackgroundColor AGENT_COLOR
+    BorderColor #228B22
+    FontColor white
+    FontSize 12
+}
+
+skinparam storage {
+    BackgroundColor DATA_COLOR
+    BorderColor #D35400
+    FontColor white
+}
+
+skinparam component {
+    BackgroundColor EXTERNAL_COLOR
+    BorderColor #7D3C98
+    FontColor white
+}
+
+' Arrow styling for clarity
+skinparam ArrowThickness 2
+skinparam ArrowColor #2C5282
+
+title Smart Policy Platform - AI-Powered Insurance Automation\n
+
+' ===== CUSTOMER LAYER =====
+actor "Customer" as Customer #LightBlue
+
+' ===== APPLICATION CORE =====
+rectangle "Web Application" as WebApp #4A90E2
+rectangle "Core Platform" as Core #2C5282
+
+' ===== AI AGENTS LAYER =====
+together {
+    cloud "1. Needs Analysis Agent" as NeedsAgent
+    cloud "2. Quote Agent" as QuoteAgent
+    cloud "3. Underwriting Agent" as UWAgent
+}
+
+together {
+    cloud "4. Evidence\n(if needed) Agent" as EvidenceAgent
+    cloud "5. Manual Review\n(if needed) Agent" as ManualAgent
+}
+
+together {
+    cloud "6. Policy Issuance Agent" as PolicyAgent
+    cloud "7. Policy Servicing Agent" as ServicingAgent
+}
+
+' ===== EXTERNAL SERVICES =====
+component "Azure OpenAI\nGPT-4" as Azure #9B59B6
+component "Payment\nGateway" as Payment #9B59B6
+
+' ===== DATA LAYER =====
+storage "Database" as Database #E67E22
+
+' ===== MAIN FLOW - Top to Bottom =====
+Customer --> WebApp : Request Quote
+WebApp --> Core : Submit Application
+
+' Always executed agents
+Core --> NeedsAgent : Always
+Core --> QuoteAgent : Always
+Core --> UWAgent : Always
+
+' Decision point after underwriting
+UWAgent -[#FF6B6B,thickness=3]-> Core : <color:#FF0000>**Decision:**</color>\n<color:#FF0000>APPROVED / MANUAL_REVIEW / REJECTED</color>
+
+' Conditional paths based on underwriting decision
+Core -[#FFA500,dashed]-> EvidenceAgent : <color:#FFA500>**If MANUAL_REVIEW**</color>\nCollect medical records
+EvidenceAgent -[#FFA500,dashed]-> ManualAgent : <color:#FFA500>Medical evidence ready</color>
+ManualAgent -[#FFA500,dashed]-> Core : <color:#FFA500>AI Recommendation</color>
+
+' Payment flow (only if approved)
+Core -[#50C878]-> Payment : <color:#50C878>**If APPROVED**</color>\nProcess payment
+Payment -[#50C878]-> PolicyAgent : <color:#50C878>Payment confirmed</color>
+
+' Policy issuance
+PolicyAgent --> Core : Policy generated
+
+' Post-issuance servicing
+Core --> ServicingAgent : Policy updates
+
+' Core to Database
+Core --> Database : Store all data
+
+' All Agents to Azure - Single consolidated connection
+NeedsAgent ..> Azure : AI
+QuoteAgent ..> Azure : AI
+UWAgent ..> Azure : AI
+EvidenceAgent ..> Azure : AI
+ManualAgent ..> Azure : AI
+PolicyAgent ..> Azure : AI
+ServicingAgent ..> Azure : AI
+
+note right of Azure
+  **AI Powers All Agents**
+  • GPT-4 intelligence
+  • Natural language processing
+  • Autonomous decisions
+end note
+
+note right of UWAgent
+  **Underwriting Decision:**
+  • <color:#50C878>APPROVED</color> → Direct to Payment
+  • <color:#FFA500>MANUAL_REVIEW</color> → Evidence + AI Analysis
+  • <color:#FF0000>REJECTED</color> → Application ends
+end note
+
+note right of ManualAgent
+  **Complex Case Handling:**
+  • Reviews medical evidence
+  • Provides risk assessment
+  • Recommends approval/rejection
+  • Human underwriter makes final call
+end note
+
+note bottom of Database
+  **Stores:**
+  • Customer profiles
+  • Quotes & premiums
+  • Underwriting decisions
+  • Policy documents
+  • Service requests
+end note
+
+
+@enduml

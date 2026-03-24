@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cache Buster - Verify Files</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        code { background: #f9f9f9; padding: 2px 6px; border-radius: 3px; }
+        button { background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 5px; }
+        button:hover { background: #5568d3; }
+        pre { background: #f9f9f9; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .highlight { background: yellow; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔍 File Verification - Cache Buster</h1>
+    
+    <div class="box">
+        <h2>Step 1: Verify JavaScript File</h2>
+        <button onclick="checkJS()">Check app.js Content</button>
+        <div id="js-result"></div>
+    </div>
+
+    <div class="box">
+        <h2>Step 2: Clear Browser Cache</h2>
+        <p>Choose one of these methods:</p>
+        <ul>
+            <li><strong>Method 1 (Recommended):</strong> Open DevTools (F12) → Network tab → Check "Disable cache" checkbox → Keep DevTools open</li>
+            <li><strong>Method 2:</strong> Press <code>Ctrl + Shift + Delete</code> → Clear cached images and files</li>
+            <li><strong>Method 3:</strong> Press <code>Ctrl + F5</code> for hard refresh</li>
+            <li><strong>Method 4:</strong> Open in Incognito/Private window</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>Step 3: Open Main Application</h2>
+        <button onclick="openApp()">Open Application (New Tab)</button>
+        <p>Or manually navigate to: <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></p>
+    </div>
+
+    <div class="box">
+        <h2>What to Look For</h2>
+        <p><strong>✅ CORRECT:</strong></p>
+        <ul>
+            <li>Widget button says <span class="highlight">"Agent Chat History"</span> (NOT "Quote Agent")</li>
+            <li>Widget header says <span class="highlight">"Agent Chat History"</span></li>
+            <li>NO tabs visible inside the widget</li>
+            <li>Quote Agent section with header appears first</li>
+            <li>When underwriting finishes, separator appears with "UNDERWRITING AGENT"</li>
+            <li>Underwriting messages appear BELOW quote messages</li>
+            <li>Both sections remain visible - nothing disappears</li>
+        </ul>
+        <p><strong>❌ INCORRECT (Old Version):</strong></p>
+        <ul>
+            <li>Widget says "Quote Agent" or "AI Agent Interactions"</li>
+            <li>Tabs are visible</li>
+            <li>Underwriting chat disappears after a few seconds</li>
+        </ul>
+    </div>
+
+    <script>
+        async function checkJS() {
+            const result = document.getElementById('js-result');
+            result.innerHTML = '<p>Fetching app.js...</p>';
+            
+            try {
+                // Add timestamp to bypass cache
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/js/app.js?v=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                const content = await response.text();
+                
+                // Check for key indicators
+                const hasAgentChatHistory = content.includes('Agent Chat History');
+                const hasAgentSeparator = content.includes('agent-separator');
+                const hasAgentChatHistoryId = content.includes('agent-chat-history');
+                const hasOldTabs = content.includes('agent-tabs');
+                
+                let html = '<h3>File Analysis:</h3>';
+                html += '<pre>';
+                html += `Contains "Agent Chat History": ${hasAgentChatHistory ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}\n`;
+                html += `Contains "agent-separator": ${hasAgentSeparator ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}\n`;
+                html += `Contains "agent-chat-history" ID: ${hasAgentChatHistoryId ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}\n`;
+                html += `Contains old "agent-tabs": ${hasOldTabs ? '<span class="error">❌ YES (BAD - old code)</span>' : '<span class="success">✅ NO (GOOD)</span>'}\n`;
+                html += '</pre>';
+                
+                if (hasAgentChatHistory && hasAgentSeparator && hasAgentChatHistoryId && !hasOldTabs) {
+                    html += '<p class="success">✅ File is CORRECT! You have the updated version.</p>';
+                    html += '<p>If the app still shows old behavior, it\'s 100% a browser cache issue.</p>';
+                } else if (hasOldTabs) {
+                    html += '<p class="error">❌ File still has OLD code with tabs!</p>';
+                    html += '<p>Server needs to restart or files need to be recompiled.</p>';
+                } else {
+                    html += '<p class="error">❌ File is incomplete or corrupted.</p>';
+                }
+                
+                // Show relevant excerpts
+                html += '<h3>File Excerpts:</h3>';
+                
+                // Find widget label
+                const widgetLabelMatch = content.match(/widget-label[^<]*>([^<]+)</);
+                if (widgetLabelMatch) {
+                    html += `<p><strong>Widget Label:</strong> "${widgetLabelMatch[1]}"</p>`;
+                }
+                
+                // Find widget title
+                const widgetTitleMatch = content.match(/<h3>([^<]+)<\/h3>/);
+                if (widgetTitleMatch) {
+                    html += `<p><strong>Widget Header:</strong> "${widgetTitleMatch[1]}"</p>`;
+                }
+                
+                result.innerHTML = html;
+                
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        function openApp() {
+            // Add timestamp to bypass cache
+            const timestamp = new Date().getTime();
+            window.open(`http://localhost:8080?v=${timestamp}`, '_blank');
+        }
+        
+        // Auto-check on load
+        window.onload = () => {
+            setTimeout(checkJS, 500);
+        };
+    </script>
+</body>
+</html>

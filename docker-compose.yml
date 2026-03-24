@@ -1,0 +1,53 @@
+services:
+  java-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Public entrypoint for EB/ALB
+    ports:
+      - "80:8080"                          # EB hits 80 -> container 8080
+    environment:
+      # Ensure the app binds correctly
+      - JAVA_TOOL_OPTIONS=-Dserver.address=0.0.0.0 -Dserver.port=8080
+      - PYTHON_BASE_URL=http://python-agents:8000
+    depends_on:
+      - python-agents
+    networks:
+      - backend
+    healthcheck:
+      #test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  python-agents:
+    build:
+      context: ./python-agents
+      args:
+        - PIP_CACHE_BUST=$(date +%s)
+    ports:
+      - "8000:8000"                         # exposed to host for direct access
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    networks:
+      - backend
+    healthcheck:
+      #test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

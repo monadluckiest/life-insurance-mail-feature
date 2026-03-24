@@ -1,0 +1,1039 @@
+/* Modern Banking Inspired Styles */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-dark: #1e40af;
+    --secondary-color: #7c3aed;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Navigation */
+.navbar {
+    background: var(--gradient);
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s;
+}
+
+.nav-links a:hover {
+    opacity: 0.8;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Hero Section */
+.hero {
+    background: var(--gradient);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Main Content */
+.main-content {
+    padding: 3rem 0;
+    max-width: 800px;
+}
+
+/* Card */
+.card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px var(--shadow);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 2rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.card-header.success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.card-header.danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.danger-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.card-header h2 {
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.card-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--gradient);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow);
+}
+
+.btn-large {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.125rem;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Quote Display */
+.quote-display {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.quote-main {
+    margin-bottom: 2rem;
+}
+
+.quote-amount {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.quote-amount .currency {
+    font-size: 2rem;
+    vertical-align: super;
+}
+
+.quote-amount .period {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.quote-detail {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.quote-details {
+    background: var(--background);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item .label {
+    color: var(--text-secondary);
+}
+
+.detail-item .value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Agent Processing Card */
+.agent-card {
+    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px var(--shadow);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
+
+.agent-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.agent-icon {
+    font-size: 2.5rem;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.agent-header h3 {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+}
+
+.agent-status {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(124, 58, 237, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--gradient);
+    animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+    0% {
+        width: 0%;
+    }
+    50% {
+        width: 70%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+/* Underwriting Steps */
+.uw-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.uw-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.uw-step.completed {
+    background: #d1fae5;
+}
+
+.step-icon {
+    font-size: 1.5rem;
+}
+
+.step-text {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+/* Payment Section */
+.stripe-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(99, 91, 255, 0.1);
+    border: 1px solid rgba(99, 91, 255, 0.3);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #635bff;
+}
+
+.stripe-badge span {
+    margin-right: 0.25rem;
+}
+
+.payment-summary {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.payment-summary h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+#payment-element {
+    margin: 2rem 0;
+}
+
+.message {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.message.error {
+    background: #fee2e2;
+    color: var(--danger-color);
+}
+
+.message.success {
+    background: #d1fae5;
+    color: var(--success-color);
+}
+
+/* Rejection Section */
+.rejection-details {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.rejection-details h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.rejection-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rejection-message {
+    padding: 1rem;
+    background: #fee2e2;
+    border-left: 4px solid var(--danger-color);
+    border-radius: 4px;
+    color: var(--danger-color);
+    font-weight: 500;
+}
+
+.rejection-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+}
+
+.check-item.failed {
+    background: #fee2e2;
+    border-color: var(--danger-color);
+}
+
+.check-item.passed {
+    background: #d1fae5;
+    border-color: var(--success-color);
+}
+
+.check-icon {
+    font-size: 1.5rem;
+}
+
+.check-text {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Policy Active */
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.policy-details {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.policy-details h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.policy-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item .label {
+    color: var(--text-secondary);
+}
+
+/* Badge */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Footer */
+.footer {
+    background: var(--text-primary);
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 4rem;
+}
+
+.footer p {
+    margin: 0.25rem 0;
+    opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .quote-amount {
+        font-size: 3rem;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .card-body,
+    .card-header {
+        padding: 1.5rem;
+    }
+}
+
+/* Agent Chat Interface */
+.agent-chat-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    animation: slideUp 0.5s ease-out;
+    border: 1px solid #e5e7eb;
+}
+
+/* Floating Chat Widget */
+.floating-chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-chat-widget.collapsed .chat-widget-container {
+    display: none;
+}
+
+.floating-chat-widget.collapsed .chat-widget-button {
+    display: flex;
+}
+
+.floating-chat-widget:not(.collapsed) .chat-widget-button {
+    display: none;
+}
+
+.floating-chat-widget:not(.collapsed) .chat-widget-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Chat Widget Button (Minimized State) */
+.chat-widget-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.chat-widget-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.widget-icon {
+    font-size: 1.75rem;
+    animation: wave 1s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(20deg); }
+    75% { transform: rotate(-20deg); }
+}
+
+.widget-label {
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.widget-badge {
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+/* Chat Widget Container (Expanded State) */
+.chat-widget-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    width: 560px;
+    max-height: 840px;
+    overflow: hidden;
+    animation: slideUpFade 0.3s ease-out;
+    border: 1px solid #e5e7eb;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.agent-chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.5rem 2rem;
+    color: white;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Agent Section Headers and Separators */
+.agent-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.agent-section-header .agent-icon {
+    font-size: 1.5rem;
+}
+
+.agent-separator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    padding: 1rem 0;
+}
+
+.agent-separator .separator-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #667eea, transparent);
+}
+
+.agent-separator .separator-text {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #667eea;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 20px;
+}
+
+
+.chat-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.chat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.agent-chat-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.agent-chat-title .agent-avatar {
+    font-size: 2.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.agent-chat-title h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.agent-subtitle {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+}
+
+.agent-chat-body {
+    padding: 1.5rem;
+    background: #f9fafb;
+    max-height: 630px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.agent-chat-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.agent-chat-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.agent-chat-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.agent-chat-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Chat Messages */
+.chat-message {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    animation: fadeIn 0.4s ease-out;
+    margin-left: auto;
+    max-width: 85%;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.chat-message .message-avatar {
+    font-size: 2rem;
+    min-width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.chat-message .message-content {
+    background: white;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    flex: 1;
+    border: 1px solid #e5e7eb;
+}
+
+.message-header {
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.message-text {
+    color: #374151;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.message-text strong {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.message-meta {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-family: 'Courier New', monospace;
+}
+
+/* Agent Message Variants */
+.agent-message .message-content {
+    background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+    border-left: 4px solid #667eea;
+}
+
+.tool-message .message-content {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+}
+
+.tool-message .message-header {
+    color: #f59e0b;
+}
+
+.data-message {
+    max-width: 75%;
+    margin-left: 4rem;
+}
+
+.data-message .message-content {
+    background: #1f2937;
+    color: #e5e7eb;
+    border: 1px solid #374151;
+}
+
+.message-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.message-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #e5e7eb;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.agent-message.success .message-content {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-left: 4px solid #10b981;
+}
+
+.agent-message.success .message-header {
+    color: #10b981;
+}
+
+.system-message {
+    justify-content: center;
+    max-width: 100%;
+}
+
+.system-message .message-content {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    text-align: center;
+    padding: 0.75rem;
+}
+
+.system-message .message-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+/* Responsive Chat */
+@media (max-width: 768px) {
+    .chat-message {
+        max-width: 95%;
+    }
+    
+    .agent-chat-body {
+        padding: 1rem;
+    }
+    
+    .data-message {
+        margin-left: 2rem;
+        max-width: 85%;
+    }
+    
+    .floating-chat-widget {
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .chat-widget-container {
+        width: calc(100vw - 20px);
+        max-width: 560px;
+        max-height: 700px;
+    }
+    
+    .chat-widget-button {
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .widget-label {
+        display: none;
+    }
+}
